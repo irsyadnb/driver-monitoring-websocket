@@ -2,7 +2,7 @@ import base64
 
 import cv2
 import numpy as np
-from flask import Flask, render_template
+from flask import Flask
 from flask_socketio import SocketIO, emit
 from ultralytics import YOLO
 
@@ -12,6 +12,9 @@ app.config['SECRET_KEY'] = 'your_secret_key'
 socketio = SocketIO(app)
 
 model = YOLO("src/best.pt")  # Update with your model path
+
+DRIVER_AWAKE = "awake"
+DRIVER_DROWSY = "drowsy"
 
 def base64_to_image(base64_string):
     # Extract the base64 encoded binary data from the input string
@@ -49,10 +52,13 @@ def receive_image(image):
         }
 
         # Emit the top prediction to the client
-        emit("prediction_result", top_prediction)
+        if(top_prediction["class"] == DRIVER_AWAKE):
+            emit("prediction_result", 1)
+        elif(top_prediction["class"] == DRIVER_DROWSY):
+            emit("prediction_result", 1)
     else:
         # If no boxes are found, emit an empty response
-        emit("prediction_result", {"message": "No detections"})
-
+        emit("prediction_result", -1)
+    
 if __name__ == "__main__":
   socketio.run(app, debug=True, port=8000, host='0.0.0.0')
