@@ -29,7 +29,10 @@
 
     <script>
       var socket = io.connect(
-  window.location.protocol + "//" + document.domain + ":" + location.port
+  window.location.protocol + "//" + document.domain + ":" + location.port,
+  {
+    query: { token: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.drt_po6bHhDOF_FJEHTrK-KD8OGjseJZpHwHIgsnoTM`}
+  }
 );
 socket.on("connect", function () {
   console.log("Connected...!", socket.connected);
