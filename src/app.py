@@ -90,7 +90,7 @@ def verify_token(token):
 if __name__ == "__main__":
     # Production settings
     host = os.getenv('HOST', '0.0.0.0')
-    port = int(os.getenv('PORT', 8000))
+    port = int(os.getenv('PORT', 3000))
     
     socketio.run(
         app, 
