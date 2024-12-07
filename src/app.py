@@ -90,4 +90,14 @@ def index():
     return render_template("index.html")
     
 if __name__ == "__main__":
-  socketio.run(app, debug=True, port=8000, host='0.0.0.0')
+    # Production settings
+    host = os.getenv('HOST', '0.0.0.0')
+    port = int(os.getenv('PORT', 8000))
+    
+    socketio.run(
+        app, 
+        host=host, 
+        port=port, 
+        debug=False,  # Crucial: Always False in production
+        use_reloader=False
+    )

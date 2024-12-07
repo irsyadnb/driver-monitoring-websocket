@@ -6,3 +6,5 @@ numpy==1.24.2
 ultralytics
 PyJWT
 python-dotenv
+gunicorn
+eventlet
