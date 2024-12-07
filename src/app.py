@@ -3,7 +3,7 @@ import os
 
 import cv2
 import numpy as np
-from flask import Flask, request, render_template
+from flask import Flask, request
 from flask_socketio import SocketIO, emit, disconnect
 from ultralytics import YOLO
 from dotenv import load_dotenv
@@ -15,6 +15,7 @@ app.config['SECRET_KEY'] = 'your_secret_key'
 socketio = SocketIO(app)
 
 model = YOLO("src/best.pt")  # Update with your model path
+
 
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
 
@@ -75,6 +76,7 @@ def receive_image(image):
         # If no boxes are found, emit an empty response
         emit("prediction_result", -1)
     
+
 def verify_token(token):
     try:
         # Decode the token
@@ -84,11 +86,7 @@ def verify_token(token):
         return None  # Token has expired
     except jwt.InvalidTokenError:
         return None  # Token is invalid
-    
-@app.route("/")
-def index():
-    return render_template("index.html")
-    
+
 if __name__ == "__main__":
     # Production settings
     host = os.getenv('HOST', '0.0.0.0')
