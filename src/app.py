@@ -1,10 +1,13 @@
 import base64
+import os
 
 import cv2
 import numpy as np
-from flask import Flask
-from flask_socketio import SocketIO, emit
+from flask import Flask, request
+from flask_socketio import SocketIO, emit, disconnect
 from ultralytics import YOLO
+from dotenv import load_dotenv
+import jwt
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
@@ -12,6 +15,11 @@ app.config['SECRET_KEY'] = 'your_secret_key'
 socketio = SocketIO(app)
 
 model = YOLO("src/best.pt")  # Update with your model path
+
+
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
+
+JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
 
 DRIVER_AWAKE = "awake"
 DRIVER_DROWSY = "drowsy"
@@ -28,9 +36,17 @@ def base64_to_image(base64_string):
     return image
 
 @socketio.on("connect")
-def test_connect():
-    print("Connected")
-    emit("my response", {"data": "Connected"})
+def handle_connect():
+    token = request.args.get('token')  # Get the token from the query parameters
+    if token:
+        payload = verify_token(token)
+        if payload:
+            # Token is valid, you can access user information from payload
+            emit("connect", f'User {payload} connected.')
+        else:
+            disconnect()  # Disconnect if the token is invalid or expired
+    else:
+        disconnect()  # Disconnect if no token is provided
 
 @socketio.on("image")
 def receive_image(image):
@@ -55,10 +71,31 @@ def receive_image(image):
         if(top_prediction["class"] == DRIVER_AWAKE):
             emit("prediction_result", 1)
         elif(top_prediction["class"] == DRIVER_DROWSY):
-            emit("prediction_result", 1)
+            emit("prediction_result", 0)
     else:
         # If no boxes are found, emit an empty response
         emit("prediction_result", -1)
     
+
+def verify_token(token):
+    try:
+        # Decode the token
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=['HS256'])
+        return payload  # Return the payload if the token is valid
+    except jwt.ExpiredSignatureError:
+        return None  # Token has expired
+    except jwt.InvalidTokenError:
+        return None  # Token is invalid
+
 if __name__ == "__main__":
-  socketio.run(app, debug=True, port=8000, host='0.0.0.0')
+    # Production settings
+    host = os.getenv('HOST', '0.0.0.0')
+    port = int(os.getenv('PORT', 8000))
+    
+    socketio.run(
+        app, 
+        host=host, 
+        port=port, 
+        debug=False,  # Crucial: Always False in production
+        use_reloader=False
+    )
