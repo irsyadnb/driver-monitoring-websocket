@@ -3,7 +3,7 @@ import os
 
 import cv2
 import numpy as np
-from flask import Flask, request
+from flask import Flask, request#, render_template
 from flask_socketio import SocketIO, emit, disconnect
 from ultralytics import YOLO
 from dotenv import load_dotenv
@@ -12,7 +12,7 @@ import jwt
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
 
-socketio = SocketIO(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 model = YOLO("src/best.pt")  # Update with your model path
 
@@ -86,6 +86,10 @@ def verify_token(token):
         return None  # Token has expired
     except jwt.InvalidTokenError:
         return None  # Token is invalid
+
+# @app.route("/")
+# def index():
+#     return render_template("index.html")
 
 if __name__ == "__main__":
     # Production settings
