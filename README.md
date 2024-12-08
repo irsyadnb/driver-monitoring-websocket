@@ -4,7 +4,7 @@ Websocket server for driver monitoring.
 # How to run
 0. Make the `.env` file by copying duplicating from the `.env.example` file.
 
-1. Create a virtual environment: <br/> ```python -m venv venv```
+1. Create a virtual environment: <br/> ```python3 -m venv venv```
 
 2. Activate the virtual environment:
 * Windows: <br/>
@@ -19,4 +19,4 @@ Websocket server for driver monitoring.
 `python3 src/app.py `
 
 5. Run the server in production <br/>
-`gunicorn --worker-class eventlet 'src.app:app' `
+`gunicorn --worker-class eventlet -b <host>:<port> 'src.app:app' `
